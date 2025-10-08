@@ -1,16 +1,16 @@
 networks:
-  net-berk:
+  net-auth:
     external: true
   
 
 volumes:
-  vol-db-berk:
+  vol-db-auth:
     driver: local
 
 
 services:
-  app-berk:
-    container_name: app-berk
+  app-auth:
+    container_name: app-auth
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,18 +20,18 @@ services:
       - '.db.env'
     volumes:
       - ./src:/code/src
-      - ./tests:/code/tests
-      - ./static:/code/static
-      - ./alembic:/code/alembic
+      # - ./tests:/code/tests
+      # - ./static:/code/static
+      # - ./alembic:/code/alembic
     ports:
       - '3000:3000'
     networks:
-      - net-berk
+      - net-auth
     depends_on:
-      - db-berk
+      - db-auth
 
-  db-berk:
-    container_name: db-berk
+  db-auth:
+    container_name: db-auth
     image: postgres:17-alpine
     # image: postgres:latest
 
@@ -42,9 +42,9 @@ services:
       - '.db.env'
 
     volumes:
-      - vol-db-berk:/var/lib/postgresql/data
+      - vol-db-auth:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     restart: unless-stopped
     networks:
-      - net-berk
+      - net-auth
