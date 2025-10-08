@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.venv": false,
+    "**/node_modules": true,
+    "**/.next": true
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+}

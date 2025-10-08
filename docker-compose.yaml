@@ -1,0 +1,50 @@
+networks:
+  net-berk:
+    external: true
+  
+
+volumes:
+  vol-db-berk:
+    driver: local
+
+
+services:
+  app-berk:
+    container_name: app-berk
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: fastapi dev src/app.py --host 0.0.0.0 --port 3000 --proxy-headers --reload
+    env_file:
+      - '.db.env'
+    volumes:
+      - ./src:/code/src
+      - ./tests:/code/tests
+      - ./static:/code/static
+      - ./alembic:/code/alembic
+    ports:
+      - '3000:3000'
+    networks:
+      - net-berk
+    depends_on:
+      - db-berk
+
+  db-berk:
+    container_name: db-berk
+    image: postgres:17-alpine
+    # image: postgres:latest
+
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+    env_file:
+      - '.db.env'
+
+    volumes:
+      - vol-db-berk:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    restart: unless-stopped
+    networks:
+      - net-berk
