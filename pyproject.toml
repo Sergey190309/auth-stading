@@ -14,6 +14,28 @@ dependencies = [
     "pydantic-settings>=2.11.0",
     "pyjwt>=2.10.1",
     "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
     "sqlalchemy>=2.0.43",
     "uvicorn>=0.37.0",
 ]
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # Errors, formatting, import order
+fixable = ["ALL"]
+
+[tool.pytest.ini_options]
+markers = [
+    "active: test under development",
+    "active1: test under development second version",
+    "asyncio: test async initiation",
+    "integration: marks tests that require a real DB"
+]
+filterwarnings = ["error::RuntimeWarning"]
+asyncio_mode = "auto"

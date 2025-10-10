@@ -5,8 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    pg_async_prefix: str = Field('postgresql+asyncpg', alias='PG_ASYNC_PREFIX')
     pg_user: str = Field('default_user', alias='PG_USER')
-    pg_passwod: str = Field('default_password', alias='PG_PASSWORD')
+    pg_password: str = Field('default_password', alias='PG_PASSWORD')
     pg_host: str = Field('localhost', alias='PG_HOST')
     pg_port: str = Field('5432', alias='PG_PORT')
     pg_db: str = Field('default_db', alias='PG_DB')
@@ -19,7 +20,12 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(
         30, alias='ACCESS_TOKEN_EXPIRE_MINUTES')  
 
-    model_config = SettingsConfigDict(env_file='.db.env', extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file='.db.env',
+        extra='ignore',
+        populate_by_name=True
+    )
 
 
-settings: Settings = Settings() # pyright: ignore[reportCallIssue]
+settings: Settings = Settings() # type: ignore
+# settings: Settings = Settings() # pyright: ignore[reportCallIssue]

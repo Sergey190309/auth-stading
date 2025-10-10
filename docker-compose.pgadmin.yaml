@@ -1,0 +1,24 @@
+
+networks:
+  net-auth:
+    external: true
+
+volumes:
+  vol-pgadmin:
+    external: true
+    name: vol-pgadmin
+
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin-berk
+    env_file:
+      - '.db.env'
+      - '.pgadmin.env'
+    ports:
+      - '8080:80'
+    volumes:
+      - vol-pgadmin:/var/lib/pgadmin
+    networks:
+      - net-auth
+    restart: unless-stopped

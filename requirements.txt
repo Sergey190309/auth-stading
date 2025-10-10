@@ -8,5 +8,6 @@ asyncpg
 # psycopg2-binary
 email-validator
 pytest
+pytest_asyncio
 
 pydantic_settings

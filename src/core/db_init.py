@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -11,19 +12,29 @@ from sqlalchemy.orm import DeclarativeBase
 
 from src.core.settings import settings
 
+# from src.core.utils.utils import create_if_not_exists
+
 db_url = (
-    f"postgresql+asyncpg://{settings.pg_user}:{settings.pg_passwod}@"
-    f"{settings.pg_host}:{settings.pg_port}/{settings.pg_db}"
+    f'{settings.pg_async_prefix}://{settings.pg_user}:{settings.pg_password}@'
+    f'{settings.pg_host}:{settings.pg_port}/{settings.pg_db}'
 )
 
-engine: AsyncEngine = create_async_engine(url=db_url, echo=True, future=True)
+engine: AsyncEngine = create_async_engine(
+    url=db_url, isolation_level='AUTOCOMMIT', echo=True, future=True
+)
 
 
 class Base(DeclarativeBase):
     pass
 
 
-async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(engine, expire_on_commit=False)
+# async def init_db() -> None:
+#     await create_if_not_exists(engine=engine)
+
+
+async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    engine, expire_on_commit=False
+)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

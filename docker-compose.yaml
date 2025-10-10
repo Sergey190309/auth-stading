@@ -20,8 +20,7 @@ services:
       - '.db.env'
     volumes:
       - ./src:/code/src
-      # - ./tests:/code/tests
-      # - ./static:/code/static
+      - ./tests:/code/tests
       # - ./alembic:/code/alembic
     ports:
       - '3000:3000'
