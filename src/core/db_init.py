@@ -8,11 +8,22 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import DeclarativeBase
 
+# from src.core.base import Base
 from src.core.settings import settings
 
+# from src.models.user_model import User
+
 # from src.core.utils.utils import create_if_not_exists
+
+admin_db_url = (
+    f'{settings.pg_async_prefix}://postgres:postgres@'
+    f'{settings.pg_host}:{settings.pg_port}/postgres'
+)
+
+admin_engine: AsyncEngine = create_async_engine(
+    url=admin_db_url, isolation_level='AUTOCOMMIT', echo=True, future=True
+)
 
 db_url = (
     f'{settings.pg_async_prefix}://{settings.pg_user}:{settings.pg_password}@'
@@ -24,8 +35,8 @@ engine: AsyncEngine = create_async_engine(
 )
 
 
-class Base(DeclarativeBase):
-    pass
+# class Base(DeclarativeBase):
+#     pass
 
 
 # async def init_db() -> None:
@@ -46,13 +57,14 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 # --------------------------------------------------------------------------
 # Utility to create/drop all tables (for testing or setup scripts)
 # --------------------------------------------------------------------------
-async def init_models() -> None:
-    """Create all tables defined in Base.metadata."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+# async def init_models() -> None:
+#     '''Create all tables defined in Base.metadata.'''
+#     print(f'\n\nBase: {Base.metadata.tables.keys()}\n\n')
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.create_all)
 
 
-async def drop_models() -> None:
-    """Drop all tables."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+# async def drop_models() -> None:
+#     '''Drop all tables.'''
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.drop_all)

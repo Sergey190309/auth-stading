@@ -21,7 +21,7 @@ async def create_user_if_not_exists(
         url=ADMIN_DB_URL, isolation_level='AUTOCOMMIT', echo=True, future=True
     ),
 ) -> list[str]:
-    '''
+    """
     Ensure a PostgreSQL user exist, creating it if necessary.
 
     Args:
@@ -31,30 +31,25 @@ async def create_user_if_not_exists(
 
     Returns:
         List[str]: Log messages about actions taken.
-    '''
+    """
     messages: list[str] = []
     # print(f'\n\nuser_name: {user_name}\n')
     try:
         async with engine.begin() as conn:
-            '''Check and create user'''
+            """Check and create user"""
             user_exists_query = text(
                 'SELECT 1 FROM pg_roles WHERE rolname = :user_name'
             )
-            result = await conn.execute(
-                user_exists_query, {'user_name': user_name})
+            result = await conn.execute(user_exists_query, {'user_name': user_name})
             user_exists = result.scalar_one_or_none()
             if not user_exists:
                 await conn.execute(
-                    text(
-                        f'CREATE USER {user_name} '
-                        f'WITH PASSWORD \'{password}\''
-                    )
+                    text(f"CREATE USER {user_name} WITH PASSWORD '{password}'")
                 )
-                messages.append(f'[INFO] User \'{user_name}\' created.')
+                messages.append(f"[INFO] User '{user_name}' created.")
                 print(messages[-1])
             else:
-                messages.append(f'[INFO] User \'{user_name}\' '
-                                'already exists.')
+                messages.append(f"[INFO] User '{user_name}' already exists.")
                 print(messages[-1])
 
     except (SQLAlchemyError, DBAPIError) as e:
@@ -66,25 +61,27 @@ async def create_user_if_not_exists(
         print(messages[-1])
         raise
     finally:
-        await engine.dispose()        
+        await engine.dispose()
     return messages
+
 
 async def create_database_if_not_exists(
     db_name: str,
     engine: AsyncEngine = create_async_engine(
-        url=ADMIN_DB_URL, isolation_level='AUTOCOMMIT', echo=True, future=True)
+        url=ADMIN_DB_URL, isolation_level='AUTOCOMMIT', echo=True, future=True
+    ),
 ) -> list[str]:
-    '''Ensure create_database_if_not_exists creates the DB if missing.'''
+    """Ensure create_database_if_not_exists creates the DB if missing."""
     messages: list[str] = []
     try:
         async with engine.begin() as conn:
-            '''Check and create database'''
+            """Check and create database"""
             db_exists_query = text(
                 'SELECT 1 FROM pg_database WHERE datname = :db_name'
             )
             result = await conn.execute(db_exists_query, {'db_name': db_name})
             db_exists = result.scalar_one_or_none()
-            '''Create database outside transaction block'''
+            """Create database outside transaction block"""
             if not db_exists:
                 autocommit_engine: AsyncEngine = create_async_engine(
                     url=ADMIN_DB_URL,
@@ -94,25 +91,25 @@ async def create_database_if_not_exists(
                 )
                 async with autocommit_engine.connect() as conn:
                     try:
-                        await conn.execute(text(
-                            f'CREATE DATABASE {quoted_name(
-                                db_name, quote=True)}'))
-                            # f'CREATE DATABASE \'{db_name}\''))
-                        messages.append(
-                            f'[INFO] Database \'{db_name}\' created.')
+                        await conn.execute(
+                            text(
+                                f'CREATE DATABASE {quoted_name(db_name, quote=True)}'
+                            )
+                        )
+                        # f'CREATE DATABASE \'{db_name}\''))
+                        messages.append(f"[INFO] Database '{db_name}' created.")
                         print(messages[-1])
                     except SQLAlchemyError as e:
                         # Likely race condition (DB created by another process)
                         messages.append(
-                            f'[WARN] Database \'{db_name}\' may already exist '
+                            f"[WARN] Database '{db_name}' may already exist "
                             f'({str(e)}).'
                         )
                         print(messages[-1])
                     finally:
                         await autocommit_engine.dispose()
             else:
-                messages.append(
-                    f'[INFO] Database \'{db_name}\' already exists.')
+                messages.append(f"[INFO] Database '{db_name}' already exists.")
                 print(messages[-1])
     except (SQLAlchemyError, DBAPIError) as e:
         messages.append(f'[ERROR] Database operation failed: {str(e)}')
@@ -134,21 +131,23 @@ async def grant_all_preveleges(
         url=ADMIN_DB_URL, isolation_level='AUTOCOMMIT', echo=True, future=True
     ),
 ) -> list[str]:
-    '''
-    Grants all privileges on an existing PostgreSQL database to an existing user.
+    """
+    Grants all privileges on an existing PostgreSQL database to an existing
+        user.
 
     Args:
         db_name (str): Name of the target database.
         user_name (str): PostgreSQL role/user to grant privileges to.
-        engine (AsyncEngine): SQLAlchemy AsyncEngine connected to the admin database.
+        engine (AsyncEngine): SQLAlchemy AsyncEngine connected to the admin
+            database.
 
     Returns:
         list[str]: Log messages describing performed actions.
-    '''
+    """
     messages: list[str] = []
     try:
         async with engine.begin() as conn:
-            '''Verify database and role existence'''
+            """Verify database and role existence"""
             db_exists_query = text(
                 'SELECT 1 FROM pg_database WHERE datname = :db_name'
             )
@@ -156,29 +155,89 @@ async def grant_all_preveleges(
                 'SELECT 1 FROM pg_roles WHERE rolname = :user_name'
             )
             db_exists_result = await conn.execute(
-                db_exists_query, {'db_name': db_name})
+                db_exists_query, {'db_name': db_name}
+            )
             user_exists_result = await conn.execute(
-                user_exists_query, {'user_name': user_name})
+                user_exists_query, {'user_name': user_name}
+            )
             if not user_exists_result.scalar_one_or_none():
-                messages.append(f'[ERROR] User \'{user_name}\' does not exist.')
+                messages.append(f"[ERROR] User '{user_name}' does not exist.")
                 print(messages[-1])
                 return messages
             if not db_exists_result.scalar_one_or_none():
-                messages.append(f'[ERROR] Database \'{db_name}\' does not exist.')
+                messages.append(f"[ERROR] Database '{db_name}' does not exist.")
                 print(messages[-1])
                 return messages
-            
-            '''Perform GRANT — double-quoted to safely handle names'''
+
+            """Perform GRANT — double-quoted to safely handle names"""
+            """Grant access to database itself"""
             grant_sql = text(
                 f'GRANT ALL PRIVILEGES ON DATABASE '
                 f'{quoted_name(db_name, quote=True)} TO '
-                f'{quoted_name(user_name, quote=True)};')
+                f'{quoted_name(user_name, quote=True)};'
+            )
             await conn.execute(grant_sql)
+            """Switch to target DB explicitly (for schema/table grants)"""
+            await conn.execute(
+                text(
+                    f'ALTER DATABASE '
+                    f'{quoted_name(db_name, quote=True)} OWNER TO '
+                    f'{quoted_name(user_name, quote=True)};'
+                )
+            )
+            """Grant on schema (assuming 'public')"""
+            await conn.execute(
+                text(
+                    'GRANT ALL ON SCHEMA public TO '
+                    f'{quoted_name(user_name, quote=True)};'
+                )
+            )
+            """Grant on all existing tables, sequences, and functions"""
+            await conn.execute(
+                text(
+                    'GRANT ALL ON ALL TABLES IN SCHEMA public TO '
+                    f'{quoted_name(user_name, quote=True)};'
+                )
+            )
+            await conn.execute(
+                text(
+                    'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO '
+                    f'{quoted_name(user_name, quote=True)};'
+                )
+            )
+            await conn.execute(
+                text(
+                    'GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO '
+                    f'{quoted_name(user_name, quote=True)};'
+                )
+            )
+            """Grant defaults for future objects"""
+            await conn.execute(
+                text(
+                    f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON '
+                    f'TABLES TO {quoted_name(user_name, quote=True)};'
+                )
+            )
+            await conn.execute(
+                text(
+                    f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON '
+                    f'SEQUENCES TO {quoted_name(user_name, quote=True)};'
+                )
+            )
+            await conn.execute(
+                text(
+                    f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON '
+                    f'FUNCTIONS TO {quoted_name(user_name, quote=True)};'
+                )
+            )
 
-            messages.append('[INFO] Granted all privileges on database '
-                            f'\'{db_name}\' to user \'{user_name}\'.')
+            messages.append(
+                '[INFO] Granted all privileges on database '
+                f"'{db_name}' to user '{user_name}'."
+            )
             print(messages[-1])
-            
+        # await engine.dispose()
+
     except (SQLAlchemyError, DBAPIError) as e:
         msg = f'[ERROR] Database operation failed: {str(e)}'
         messages.append(msg)
@@ -193,4 +252,3 @@ async def grant_all_preveleges(
         await engine.dispose()
 
     return messages
-

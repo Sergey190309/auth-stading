@@ -20,11 +20,14 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 80
+line-length = 85
+fix = true
+# string-quote = "singele"
 
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
+# string-quote = "single"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]  # Errors, formatting, import order
