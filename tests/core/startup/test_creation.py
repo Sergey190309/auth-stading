@@ -1,86 +1,83 @@
 from typing import AsyncIterator, Callable
 
 import pytest
-import pytest_asyncio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncConnection,
     AsyncEngine,
-    create_async_engine,
 )
 
-from src.core.settings import settings
+# from src.core.settings import settings
 from src.core.startup.creation import (
     create_database_if_not_exists,
     create_user_if_not_exists,
     grant_all_preveleges,
 )
 
-
-@pytest.fixture(scope='module')
-def test_db_name() -> str:
-    return 'test_db_name'
-
-
-@pytest.fixture(scope='module')
-def test_user_name() -> str:
-    return 'test_user'
+# @pytest.fixture(scope='module')
+# def test_db_name() -> str:
+#     return 'test_db_name'
 
 
-@pytest.fixture(scope='module')
-def test_user_password() -> str:
-    return 'test_password'
+# @pytest.fixture(scope='module')
+# def test_user_name() -> str:
+#     return 'test_user'
 
 
-@pytest.fixture(scope='module')
-def async_admin_url() -> str:
-    """Fixture to provide the admin database URL."""
-    url: str = (
-        f'{settings.pg_async_prefix}://postgres:postgres@'
-        f'{settings.pg_host}:{settings.pg_port}/postgres'
-    )
-    return url
+# @pytest.fixture(scope='module')
+# def test_user_password() -> str:
+#     return 'test_password'
 
 
-@pytest.fixture(scope='module')
-def async_admin_url_test_db(
-    test_user_name: str, test_user_password: str, test_db_name: str
-) -> str:
-    """Fixture to provide the admin database URL."""
-    url: str = (
-        f'{settings.pg_async_prefix}://postgres:postgres@'
-        f'{settings.pg_host}:{settings.pg_port}/{test_db_name}'
-    )
-    return url
+# @pytest.fixture(scope='module')
+# def async_admin_url() -> str:
+#     """Fixture to provide the admin database URL."""
+#     url: str = (
+#         f'{settings.pg_async_prefix}://postgres:postgres@'
+#         f'{settings.pg_host}:{settings.pg_port}/postgres'
+#     )
+#     return url
 
 
-@pytest.fixture(scope='module')
-def async_user_url_test_db(
-    test_user_name: str, test_user_password: str, test_db_name: str
-) -> str:
-    """Fixture to provide the admin database URL."""
-    url: str = (
-        f'{settings.pg_async_prefix}://{test_user_name}:{test_user_password}@'
-        f'{settings.pg_host}:{settings.pg_port}/{test_db_name}'
-    )
-    return url
+# @pytest.fixture(scope='module')
+# def async_admin_url_test_db(
+#     test_user_name: str, test_user_password: str, test_db_name: str
+# ) -> str:
+#     """Fixture to provide the admin database URL."""
+#     url: str = (
+#         f'{settings.pg_async_prefix}://postgres:postgres@'
+#         f'{settings.pg_host}:{settings.pg_port}/{test_db_name}'
+#     )
+#     return url
 
 
-@pytest_asyncio.fixture(scope='function')
-async def async_engine_factory() -> Callable[[str], AsyncIterator[AsyncEngine]]:
-    async def _factory(async_url: str) -> AsyncIterator[AsyncEngine]:
-        engine: AsyncEngine = create_async_engine(
-            url=async_url,
-            isolation_level='AUTOCOMMIT',
-            echo=True,
-            future=True,
-        )
-        try:
-            yield engine
-        finally:
-            await engine.dispose()
+# @pytest.fixture(scope='module')
+# def async_user_url_test_db(
+#     test_user_name: str, test_user_password: str, test_db_name: str
+# ) -> str:
+#     """Fixture to provide the admin database URL."""
+#     url: str = (
+#         f'{settings.pg_async_prefix}://{test_user_name}:{test_user_password}@'
+#         f'{settings.pg_host}:{settings.pg_port}/{test_db_name}'
+#     )
+#     return url
 
-    return _factory
+
+# @pytest_asyncio.fixture(scope='function')
+# async def async_engine_factory() -> Callable[[str], AsyncIterator[AsyncEngine]]:
+#     async def _factory(async_url: str) -> AsyncIterator[AsyncEngine]:
+#         engine: AsyncEngine = create_async_engine(
+#             url=async_url,
+#             isolation_level='AUTOCOMMIT',
+#             echo=True,
+#             future=True,
+#         )
+#         try:
+#             yield engine
+#         finally:
+#             await engine.dispose()
+
+#     return _factory
 
 
 # @pytest.mark.active
@@ -176,7 +173,7 @@ async def test_create_database_if_not_exists(
         #     await conn.execute(text(f'DROP DATABASE IF EXISTS {test_db_name}'))
 
 
-@pytest.mark.active
+# @pytest.mark.active
 @pytest.mark.asyncio
 async def test_grant_all_preveleges(
     test_db_name: str,
@@ -248,44 +245,44 @@ async def test_grant_all_preveleges(
                 f"'{test_db_name}' to user '{test_user_name}'."
             ) in messages
             print(f'\n\nmessages: {messages}\n\n')
-        await engine.dispose()
+        # await engine.dispose()
 
-    #         result = await conn.execute(
-    #             text("""
-    #             SELECT datname as database_name,
-    #                 has_database_privilege(:username, datname, 'CONNECT') 
-    #                     as can_connect,
-    #                 has_database_privilege(:username, datname, 'CREATE') 
-    #                     as can_create,
-    #                 has_database_privilege(:username, datname, 'TEMPORARY') 
-    #                     as can_temp
-    #             FROM pg_database
-    #             WHERE datname NOT IN ('template0', 'template1')
-    #             ORDER BY datname
-    #         """),
-    #             {'username': test_user_name},
-    #         )
-    #         return_data = [dict(row) for row in result.mappings()]
-    #         # return_data = result.fetchall()
-    #         for item in return_data:
-    #             if item['database_name'] == test_db_name:
-    #                 assert item['can_connect']
-    #                 assert item['can_create']
-    #                 assert item['can_temp']
+            result = await conn.execute(
+                    text("""
+                    SELECT datname as database_name,
+                        has_database_privilege(:username, datname, 'CONNECT') 
+                            as can_connect,
+                        has_database_privilege(:username, datname, 'CREATE') 
+                            as can_create,
+                        has_database_privilege(:username, datname, 'TEMPORARY') 
+                            as can_temp
+                    FROM pg_database
+                    WHERE datname NOT IN ('template0', 'template1')
+                    ORDER BY datname
+                """),
+                    {'username': test_user_name},
+                )
+            return_data = [dict(row) for row in result.mappings()]
+                # return_data = result.fetchall()
+            for item in return_data:
+                if item['database_name'] == test_db_name:
+                    assert item['can_connect']
+                    assert item['can_create']
+                    assert item['can_temp']
 
-    # async for engine in async_engine_factory(async_admin_url):
-    #     async with engine.begin() as conn:
-    #         result = await conn.execute(
-    #             text("""
-    #                 SELECT grantee, table_schema, table_name, privilege_type
-    #                 FROM information_schema.role_table_grants
-    #                 WHERE grantee = :username
-    #                 ORDER BY table_schema, table_name, privilege_type;
-    #             """),
-    #             {'username': test_user_name},
-    #         )
-    #         return_data = [dict(row) for row in result.mappings()]
-    #         print(f'\n\nreturn_data: {return_data}\n\n')
+    async for engine in async_engine_factory(async_admin_url):
+        async with engine.begin() as conn:
+            result = await conn.execute(
+                text("""
+                    SELECT grantee, table_schema, table_name, privilege_type
+                    FROM information_schema.role_table_grants
+                    WHERE grantee = :username
+                    ORDER BY table_schema, table_name, privilege_type;
+                """),
+                {'username': test_user_name},
+            )
+            return_data = [dict(row) for row in result.mappings()]
+            print(f'\n\nreturn_data: {return_data}\n\n')
     """
     --- CLEANUP ---
     Revoke privileges and remove DB/user

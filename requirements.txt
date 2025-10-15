@@ -1,6 +1,6 @@
 fastapi[standard]
 bcrypt
-pyjwt
+# pyjwt
 alembic
 uvicorn
 SQLAlchemy
@@ -11,3 +11,4 @@ pytest
 pytest_asyncio
 
 pydantic_settings
+python-jose[cryptography]

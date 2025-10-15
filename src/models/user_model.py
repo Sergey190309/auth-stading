@@ -1,11 +1,20 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from typing import Any, TypedDict
 
+import bcrypt
+from jose import jwt
 from sqlalchemy import Boolean, String, func
 from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.base import Base
+from src.core.settings import settings
+
+
+class TokenPayload(TypedDict):
+    user_id: str
+    exp: datetime
 
 
 class User(Base):
@@ -26,3 +35,28 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f'User(id={self.id}, email={self.email})'
+
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Transforms password from it's raw textual form to
+        cryptographic hashes
+        """
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode('utf-8')
+
+    def validate_password(self, password: str) -> bool:
+        """Confirms password validity"""
+        return bcrypt.checkpw(password.encode(), self.hashed_password.encode())
+
+    def generate_token(self) -> dict[str, str]:
+        """Generates JWT token"""
+        payload: dict[str, Any] = {
+            'user_id': str(self.id),
+            'exp': datetime.now(timezone.utc)
+            + timedelta(minutes=settings.access_token_expire_minutes),
+        }
+        token: str = jwt.encode(
+            claims=payload,
+            key=settings.secret_key,
+            algorithm=settings.algorithm
+        )
+        return {'access_token': token}
