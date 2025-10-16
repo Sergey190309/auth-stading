@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, TypedDict
@@ -35,6 +37,15 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f'User(id={self.id}, email={self.email})'
+    
+    def to_dict(self) -> dict[str, str]:
+        return {
+            'id': str(self.id),
+            'email': self.email,
+            'full_name': self.full_name,
+            'is_active': str(self.is_active),
+            'created_at': str(self.created_at),
+        }
 
     @staticmethod
     def hash_password(password: str) -> str:

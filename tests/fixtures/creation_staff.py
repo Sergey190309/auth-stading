@@ -1,28 +1,22 @@
-from typing import AsyncIterator, Callable
-
 import pytest
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    create_async_engine,
-)
 
 from src.core.settings import settings
+from tests.consts_and_utils import TEST_DB_NAME, TEST_USER_NAME, TEST_USER_PASSWORD
 
 
 @pytest.fixture(scope='module')
 def test_db_name() -> str:
-    return 'test_db_name'
+    return TEST_DB_NAME
 
 
 @pytest.fixture(scope='module')
 def test_user_name() -> str:
-    return 'test_user'
+    return TEST_USER_NAME
 
 
 @pytest.fixture(scope='module')
 def test_user_password() -> str:
-    return 'test_password'
+    return TEST_USER_PASSWORD
 
 
 @pytest.fixture(scope='module')
@@ -57,20 +51,3 @@ def async_user_url_test_db(
         f'{settings.pg_host}:{settings.pg_port}/{test_db_name}'
     )
     return url
-
-
-@pytest_asyncio.fixture(scope='function')
-async def async_engine_factory() -> Callable[[str], AsyncIterator[AsyncEngine]]:
-    async def _factory(async_url: str) -> AsyncIterator[AsyncEngine]:
-        engine: AsyncEngine = create_async_engine(
-            url=async_url,
-            isolation_level='AUTOCOMMIT',
-            echo=True,
-            future=True,
-        )
-        try:
-            yield engine
-        finally:
-            await engine.dispose()
-
-    return _factory

@@ -1,6 +1,9 @@
 from __future__ import annotations
+
+from datetime import datetime
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class BaseUserSchema(BaseModel):
@@ -15,5 +18,6 @@ class CreateUserSchema(BaseUserSchema):
 class UserSchema(BaseUserSchema):
     id: UUID = Field(...)
     is_active: bool = Field(default=False)
+    created_at: datetime = Field(..., description="Timestamp when user was created")
 
     model_config = ConfigDict(from_attributes=True)
