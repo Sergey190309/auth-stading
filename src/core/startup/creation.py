@@ -147,23 +147,25 @@ async def grant_all_preveleges(
     messages: list[str] = []
     try:
         async with engine.begin() as conn:
+            # db_exists_query = text(
+            #     'SELECT 1 FROM pg_database WHERE datname = :db_name'
+            # )
             """Verify database and role existence"""
-            db_exists_query = text(
-                'SELECT 1 FROM pg_database WHERE datname = :db_name'
-            )
-            user_exists_query = text(
-                'SELECT 1 FROM pg_roles WHERE rolname = :user_name'
-            )
-            db_exists_result = await conn.execute(
-                db_exists_query, {'db_name': db_name}
-            )
+            # user_exists_query = text(
+            #     'SELECT 1 FROM pg_roles WHERE rolname = :user_name'
+            # )
             user_exists_result = await conn.execute(
-                user_exists_query, {'user_name': user_name}
+                text('SELECT 1 FROM pg_roles WHERE rolname = :user_name'), 
+                {'user_name': user_name}
             )
             if not user_exists_result.scalar_one_or_none():
                 messages.append(f"[ERROR] User '{user_name}' does not exist.")
                 print(messages[-1])
                 return messages
+            db_exists_result = await conn.execute(
+                text('SELECT 1 FROM pg_database WHERE datname = :db_name'), 
+                {'db_name': db_name}
+            )
             if not db_exists_result.scalar_one_or_none():
                 messages.append(f"[ERROR] Database '{db_name}' does not exist.")
                 print(messages[-1])

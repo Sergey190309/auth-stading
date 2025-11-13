@@ -6,7 +6,14 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from tests.consts_and_utils import create_test_user
+from tests.consts_and_utils import (
+    create_tables,
+    create_test_db,
+    create_test_user,
+    grant_preveleges,
+    remove_db,
+    remove_user,
+)
 
 
 @pytest_asyncio.fixture(scope='function')
@@ -69,17 +76,21 @@ async def async_user_test_db_engine_instance(
 async def create_empty_test_db(
     async_admin_engine_instance: AsyncEngine,
     async_user_test_db_engine_instance: AsyncEngine,
-    test_user_name: str,
+    # test_user_name: str,
 ) -> AsyncGenerator[AsyncEngine]:
-    # pytest will inject the yielded AsyncEngine instance from the
-    # `async_admin_engine_instance` fixture, so treat it as an AsyncEngine here.
     engine: AsyncEngine = async_admin_engine_instance
-    # create the test user on the admin engine
-    await create_test_user(engine=engine, user_name=test_user_name)
+    """create the test user on the admin engine"""
+    await create_test_user(engine=engine)
+    """create the test db on the admin engine"""
+    await create_test_db(engine=engine)
+    """Grant all priveleges on the test db to the test user"""
+    await grant_preveleges(engine=engine)
+    local_engine = async_user_test_db_engine_instance
+    await create_tables(engine=local_engine)
     try:
-        # yield the engine connected to the test DB for consumers
+        """yield the engine connected to the test DB for consumers"""
         yield async_user_test_db_engine_instance
     finally:
-        # do not dispose the admin engine here — the provider fixture
-        # `async_admin_engine_instance` is responsible for teardown.
-        pass
+        # pass
+        await remove_db(engine=engine)
+        await remove_user(engine=engine)

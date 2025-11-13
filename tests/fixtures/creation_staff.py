@@ -1,13 +1,22 @@
 import pytest
 
 from src.core.settings import settings
-from tests.consts_and_utils import TEST_DB_NAME, TEST_USER_NAME, TEST_USER_PASSWORD
+from tests.consts_and_utils import (
+    TEST_DB_NAME,
+    TEST_USER_EMAIL,
+    TEST_USER_NAME,
+    TEST_USER_PASSWORD,
+)
 
 
 @pytest.fixture(scope='module')
 def test_db_name() -> str:
     return TEST_DB_NAME
 
+
+@pytest.fixture(scope='module')
+def test_user_email() -> str:
+    return TEST_USER_EMAIL
 
 @pytest.fixture(scope='module')
 def test_user_name() -> str:

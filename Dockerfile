@@ -1,13 +1,21 @@
-FROM python:3.13-alpine AS base
+FROM python:3.14-alpine AS base
 
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /code
 
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    gcc \
+    musl-dev
+
+
 COPY ./requirements.txt ./requirements.txt
 COPY ./pyproject.toml ./pyproject.toml
 # COPY ./alembic.ini ./alembic.ini
 
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 
 ENV PYTHONPATH=/code
