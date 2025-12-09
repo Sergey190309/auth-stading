@@ -50,7 +50,7 @@ async def test_create_user(
             assert 'User already exists' in str(exec_info.value)
 
 
-@pytest.mark.active
+# @pytest.mark.active
 @pytest.mark.asyncio
 async def test_get_user_by_email(
     test_user_email: str,

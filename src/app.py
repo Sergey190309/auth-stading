@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from src.core.settings import settings
 from src.core.start import startup
 
 
@@ -17,11 +18,11 @@ async def lifespan(app: FastAPI):
     # print('after')
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, title=settings.project_name)
 
 
 
-@app.post('/login')
+@app.get('/login')
 def login():
     """Processes user's authentication and returns a token
     on successful authentication.
@@ -33,4 +34,4 @@ def login():
 
     - password:
     """
-    return "ThisTokenIsFake"
+    return "ThisTokenIsFake!"

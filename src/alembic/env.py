@@ -87,19 +87,11 @@ async def run_migrations_online() -> None:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
 
-async def do_run_migrations(connection: Connection) -> None:
+def do_run_migrations(connection: Connection) -> None:
+# async def do_run_migrations(connection: Connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
-
-#     async with context.begin_transaction():
-#         context.run_migrations()
-#         # context.configure(
-#         #     connection=connection, target_metadata=target_metadata
-#         # )
-
-#         with context.begin_transaction():
-#             context.run_migrations()
 
 '''Entrypoint'''
 

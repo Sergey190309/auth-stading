@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 85
+line-length = 80
 fix = true
 # string-quote = "singele"
 

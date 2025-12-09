@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    project_name: str = 'My FastAPI project'
     pg_async_prefix: str = Field('postgresql+asyncpg', alias='PG_ASYNC_PREFIX')
     pg_user: str = Field('default_user', alias='PG_USER')
     pg_password: str = Field('default_password', alias='PG_PASSWORD')
@@ -18,14 +19,13 @@ class Settings(BaseSettings):
     secret_key: str = Field('default_secret', alias='SECRET_KEY')
     algorithm: str = Field('HS256', alias='ALGORITHM')
     access_token_expire_minutes: int = Field(
-        30, alias='ACCESS_TOKEN_EXPIRE_MINUTES')  
+        30, alias='ACCESS_TOKEN_EXPIRE_MINUTES'
+    )
 
     model_config = SettingsConfigDict(
-        env_file='.db.env',
-        extra='ignore',
-        populate_by_name=True
+        env_file='.db.env', extra='ignore', populate_by_name=True
     )
 
 
-settings: Settings = Settings() # type: ignore
+settings: Settings = Settings()  # type: ignore
 # settings: Settings = Settings() # pyright: ignore[reportCallIssue]

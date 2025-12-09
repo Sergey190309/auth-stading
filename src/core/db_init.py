@@ -16,7 +16,7 @@ from src.core.settings import settings
 
 # from src.core.utils.utils import create_if_not_exists
 
-admin_db_url = (
+admin_db_url: str = (
     f'{settings.pg_async_prefix}://postgres:postgres@'
     f'{settings.pg_host}:{settings.pg_port}/postgres'
 )
@@ -25,7 +25,7 @@ admin_engine: AsyncEngine = create_async_engine(
     url=admin_db_url, isolation_level='AUTOCOMMIT', echo=True, future=True
 )
 
-db_url = (
+db_url: str = (
     f'{settings.pg_async_prefix}://{settings.pg_user}:{settings.pg_password}@'
     f'{settings.pg_host}:{settings.pg_port}/{settings.pg_db}'
 )

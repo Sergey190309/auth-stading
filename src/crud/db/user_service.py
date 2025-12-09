@@ -7,7 +7,9 @@ from src.models.user_model import User
 from src.schemas.user_schema import CreateUserSchema, UserSchema
 
 
-async def create_user(session: AsyncSession, user: CreateUserSchema) -> UserSchema:
+async def create_user(
+    session: AsyncSession, user: CreateUserSchema
+) -> UserSchema:
     try:
         existing_user: User | None = await session.scalar(
             select(User).where(User.email == user.email)
@@ -31,7 +33,9 @@ async def create_user(session: AsyncSession, user: CreateUserSchema) -> UserSche
         raise RuntimeError(f'Unexpected error: {str(e)}') from e
 
 
-async def get_user_by_email(session: AsyncSession, email: str) -> UserSchema | None:
+async def get_user_by_email(
+    session: AsyncSession, email: str
+) -> UserSchema | None:
     try:
         query = select(User).where(User.email == email)
         result = await session.execute(query)

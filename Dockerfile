@@ -1,15 +1,20 @@
-FROM python:3.14-alpine AS base
+FROM python:3.14-slim-trixie AS base
+# FROM python:3.14-alpine AS base
 
 ENV PYTHONUNBUFFERED=1
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# RUN apk add --no-cache \
+# build-base \
+# postgresql-dev \
+# gcc \
+# musl-dev
+
 WORKDIR /code
-
-RUN apk add --no-cache \
-    build-base \
-    postgresql-dev \
-    gcc \
-    musl-dev
-
 
 COPY ./requirements.txt ./requirements.txt
 COPY ./pyproject.toml ./pyproject.toml
